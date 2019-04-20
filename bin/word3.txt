@@ -1,0 +1,9 @@
+int
+id
+;
+id
+=
+id
++
+num
+;

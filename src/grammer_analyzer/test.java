@@ -3,9 +3,11 @@ package grammer_analyzer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.ListIterator;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class test {
-
+	static ArrayList<String> termimalToken = new ArrayList<>();// 终结符号有哪些
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
 		/*
@@ -62,16 +64,36 @@ public class test {
 				newElement.clear();
 			}
 		}*/
-		String s = "$|a|b";
-		String[] a = s.split("\\|");
-		System.out.println(Arrays.toString(a));
-		
-		
-		
-		
-		
-		
-		
+		/*
+		termimalToken.add("num");
+		termimalToken.add("int");
+		termimalToken.add("id");
+		countSpecialToken("int+id");
+		countSpecialToken("id+id");
+		countSpecialToken("TF");*/
+		String s  = "D.;S";
+		String a = s.replace(".", "");
+		//System.out.println(s.substring(2, s.length()));
+		String docSplit[] = s.split("\\.");
+		System.out.println("A.B分开"+Arrays.toString(docSplit));
 	}
-
+	
+	//输入：doc后边的字符串，检查是否有特殊字符，如何移动
+	//输出:(1)如果word[0]==""，说明没有匹配，老老实实移动一个字节(2)!="，说明有关键字，要变成 word[0]+"."+word[1]
+	static void countSpecialToken(String sentence){
+		//int+id  TF
+		String[] word = {"",""};
+		for(String s :termimalToken) {
+			String REGEX = s;
+			Pattern pattern = Pattern.compile(REGEX); //创建一个以字符串为标准的模式
+			Matcher matcher = pattern.matcher(sentence);//判断是否match
+			if(matcher.lookingAt()) {//有匹配的东西
+				word[0] = s;
+				word[1] = sentence.replaceFirst(s, "");
+				break;
+			}
+			//System.out.println("lookingAt(): "+matcher.lookingAt());
+		}
+		System.out.println(Arrays.toString(word));
+	}
 }
