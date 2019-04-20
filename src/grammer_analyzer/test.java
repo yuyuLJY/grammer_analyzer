@@ -1,6 +1,7 @@
 package grammer_analyzer;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.ListIterator;
 
 public class test {
@@ -45,6 +46,7 @@ public class test {
 		//输出 1 我发现1啦!!! 2  //但是顺序不好
 		 */
 		
+		/*
 		ArrayList<String>  a = new ArrayList<>();
 		ArrayList<String>  newElement = new ArrayList<>();//新增加的元素
 		a.add("1");
@@ -59,7 +61,10 @@ public class test {
 				length = length+newElement.size();
 				newElement.clear();
 			}
-		}
+		}*/
+		String s = "$|a|b";
+		String[] a = s.split("\\|");
+		System.out.println(Arrays.toString(a));
 		
 		
 		
