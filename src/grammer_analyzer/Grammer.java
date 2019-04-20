@@ -25,21 +25,25 @@ public class Grammer {
 	static ArrayList<String[]> gotoList = new ArrayList<>();// 跳转表 {"本状态 活前缀 跳转状态"}、{}
 	static Map<String, Integer> token2Number = new LinkedHashMap<>();// a在表的第一个，b在表的第二个
 	static String startToken ;
+	static ArrayList<String[]> grammerBlock = new ArrayList<>();
 	public static void main(String[] args) {
-		Map<String, Integer> actionNumber = new HashMap<>();
-		actionNumber.put("a", 0);
-
-		Map<String, Integer> gotoNumber = new HashMap<>();
-
+		System.out.println("----------------Start------------");
+		
 		// TODO 读取文法
-		readGrammer("src/G.txt");// 输入的必须是增广文法
+		readGrammer("src/G3.txt");// 输入的必须是增广文法
+		
+		//TODO 构建block
+		String aa[] = {"D",";","S"};
+		String bb[] = {"T","L","S"};
 		// TODO 如何求goto/action的符号有哪些
+		/*
 		gotoToken.add("S");
 		gotoToken.add("A");
 		gotoToken.add("B");
 		actionToken.add("a");
 		actionToken.add("b");
 		actionToken.add("$");
+		*/
 		/*
 		 * //验证是否读取了文法,ok for(String s:grammerList) { System.out.println(s); }
 		 */
@@ -62,6 +66,11 @@ public class Grammer {
 
 		// TODO 计算first集合
 		countFirst();
+		System.out.println("验证first集合");
+		String content = ""; for(Map.Entry<String, Set<Character>> entry :firstList.entrySet()){ 
+			content += entry.getKey() + "  :  " + entry.getValue()+ "\n"; 
+			System.out.println(entry.getKey() + "  :  " + entry.getValue()); 
+		}
 
 		// TODO 如何求goto/action的符号有哪些
 		countGotoActionList();
@@ -72,11 +81,9 @@ public class Grammer {
 		 */
 
 		// countActionGotoToken();//把表列好
-		/*
-		 * String content = ""; for(Map.Entry<String, Set<Character>> entry :
-		 * firstList.entrySet()){ content += entry.getKey() + "  :  " + entry.getValue()
-		 * + "\n"; System.out.println(entry.getKey() + "  :  " + entry.getValue()); }
-		 */
+		
+
+		
 		/*
 		 * //验证是否在表达式前加点成功,ok for(String s:grammerListFirst) { System.out.println(s); }
 		 */
@@ -293,7 +300,7 @@ public class Grammer {
 					if (index + 2 <= grammerList[1].length() - 1) {// 如果S后边还有字符，e.g.:s->A.BC
 						// System.out.println("需要遍历后继的："+grammerList[1]);
 						String docFollowFollow = String.valueOf(grammerList[1].charAt(index + 2));
-						lastToken = lastToken + getLRFirst(docFollowFollow);
+						lastToken = lastToken + getLRFirst(docFollowFollow,lastToken);
 					}
 					// 找出所有的后继加进another列表
 					String str = docFollow + "->";// S->
@@ -341,6 +348,7 @@ public class Grammer {
 			stardardConbineGrammer.put(grammerLeft, rightList);
 		}
 		for (String k : stardardConbineGrammer.keySet()) {
+			System.out.println("查找k的first集合："+k);
 			findEveryFirst(k, stardardConbineGrammer.get(k));// 对每一个非终结符调用查找first的函数
 		}
 	}
@@ -352,6 +360,7 @@ public class Grammer {
 		for (int i = 0; i < rightNodes.length; ++i) {
 			for (int j = 0; j < rightNodes[i].length(); ++j) {
 				String nextNode = "" + rightNodes[i].charAt(j);
+				//System.out.println(nextNode);
 				if (!stardardConbineGrammer.containsKey(nextNode)) {// 终结点
 					st.add(nextNode.charAt(0));
 					break;
@@ -374,15 +383,20 @@ public class Grammer {
 	}
 
 	// 求first集合
-	static String getLRFirst(String s) {
+	static String getLRFirst(String s,String lastToken) {
 		/**
+		 * 如果lastToken里边有了就不要了
 		 * @return : |a|b
 		 */
+		
 		String firstString = "";
-		for (Character ss : firstList.get(s)) {
-			if (ss != 'ε') {// 不包含空
-				// System.out.println("jin "+ss);
-				firstString = firstString + "|" + ss;
+		//System.out.println("查找"+s+"的first集合");
+		if(firstList.get(s) != null) {
+			for (Character ss : firstList.get(s)) {
+				if ((ss != 'ε') &&  (!lastToken.contains(String.valueOf(ss)))) {// 不包含空
+					// System.out.println("jin "+ss);
+					firstString = firstString + "|" + ss;
+				}
 			}
 		}
 		// System.out.println("找："+firstString);
@@ -420,6 +434,8 @@ public class Grammer {
 						// 先全填上移入
 						analyList[i][token2Number.get(s[1])] = "S" + s[2];
 					} else {// 是goto表的项，只需要填数字
+						System.out.println("error:"+s[2]);
+						System.out.println("index:"+s[1]);
 						analyList[i][token2Number.get(s[1])] = s[2];
 					}
 				}

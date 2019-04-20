@@ -1,0 +1,11 @@
+P->D;S
+D->TL;
+T->int
+L->id
+E->TE'
+E'->+TE'
+E'->¦Å
+T->F
+F->id
+F->num
+S->id=E
