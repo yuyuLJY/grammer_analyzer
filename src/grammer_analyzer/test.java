@@ -71,11 +71,27 @@ public class test {
 		countSpecialToken("int+id");
 		countSpecialToken("id+id");
 		countSpecialToken("TF");*/
+		/*
 		String s  = "D.;S";
 		String a = s.replace(".", "");
 		//System.out.println(s.substring(2, s.length()));
 		String docSplit[] = s.split("\\.");
 		System.out.println("A.B分开"+Arrays.toString(docSplit));
+		*/
+		/*
+		String str="say87";
+		System.out.println(moveToLeft(str, 2));//左移两位
+		*/
+		String a = "a|b";
+		String b = "a|b|c";
+		System.out.println(b.contains(a));
+	}
+	
+	static String moveToLeft(String str,int position) {
+		String str1=str.substring(position);
+		System.out.println("str1:"+str1);
+		String str2=str.substring(0, position);
+		return str1+str2;
 	}
 	
 	//输入：doc后边的字符串，检查是否有特殊字符，如何移动

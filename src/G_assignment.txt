@@ -1,0 +1,6 @@
+S->id=E
+E->E+T;
+E->T
+T->F
+F->id
+F->num

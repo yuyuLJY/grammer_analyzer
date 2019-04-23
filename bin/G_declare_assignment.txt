@@ -1,10 +1,9 @@
-P->D;S
+P->DS
 D->TL;
 T->int
 L->id
-E->TE'
-E'->+TE'
-E'->¦Å
+E->E+T;
+E->T
 T->F
 F->id
 F->num

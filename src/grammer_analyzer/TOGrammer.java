@@ -36,15 +36,27 @@ public class TOGrammer {
 	static String[][] analyList = new String[projectSet.size()][token2Number.size()];
 	public static void main(String[] args) {
 		System.out.println("----------------Start------------");
+		String GName[] = {"G_if_else.txt","G_assignment.txt","G_declear.txt","G_declare_assignment.txt"};
+		String wordName[] = {"word_if_else.txt","word_assignment.txt","word_declare.txt","word_declare_assignment.txt"};
+		String oneWordName = "src/"+wordName[1];
 		
 		// TODO 读取文法
-		readGrammer("src/G.txt");// 输入的必须是增广文法
+		readGrammer("src/"+GName[1]);// 输入的必须是增广文法
 		
 		//TODO 构建block
 		termimalToken.add("num");
 		termimalToken.add("int");
 		termimalToken.add("id");
-
+		termimalToken.add("E'");
+		termimalToken.add("else");
+		termimalToken.add("if");
+		termimalToken.add("&&");
+		termimalToken.add(";");
+		//打印出文法
+		for(int i = 0;i<grammerList.size();i++) {
+			System.out.println(i+" "+grammerList.get(i));
+		}
+		
 		// TODO 给文法的表达式加上点=> S->.A
 		for (String s : grammerList) {
 			String[] list = s.split("->");
@@ -70,6 +82,7 @@ public class TOGrammer {
 			System.out.println(entry.getKey() + "  :  " + entry.getValue()); 
 		}
 		
+		
 		// TODO 如何求goto/action的符号有哪些
 		countGotoActionList();
 		
@@ -90,10 +103,11 @@ public class TOGrammer {
 		for (String[] s : oneOfSet) { 
 			System.out.println(s[0] + "," +s[1]); }
 		
+		
 		// TODO 使用goto来遍历后面的状态
 		int projectStateNumber = projectSet.size();
 		System.out.println("当前状态个数：" + projectStateNumber);
-		for (int i = 0; i < projectStateNumber; i++) {
+		for (int i = 0; (i < projectStateNumber); i++) {
 			System.out.println("遍历状态：" + i);
 			System.out.println("--------------输入状态satrt--------");
 			for (String[] s : projectSet.get(i)) {
@@ -101,9 +115,9 @@ public class TOGrammer {
 			}
 			System.out.println("--------------输入状态end-----------");
 			GOTO(projectSet.get(i), i);// 状态集合，当前状态的标号
-			if (i == projectStateNumber - 1) {// 检查state数目是否变化
-				System.out.println("当前状态个数：" + projectSet.size());
-				projectStateNumber = projectSet.size() - 1;
+			System.out.println("当前状态个数：" + projectSet.size()+" i"+(projectStateNumber - 1));
+			if (i == projectStateNumber - 1) {// 检查state数目是否变化,到最后一个了
+				projectStateNumber = projectSet.size();
 			}
 		}
 		
@@ -123,21 +137,22 @@ public class TOGrammer {
 		}
 		// ------------------打印效果end--------------------------
 		
+		
 		// 创建LR1分析表
 		analyList = reateLRAnalyTable();
 		
 		// --------------------------查看分析表的效果start -------------------
 		//success
 		System.out.println("查看分析表的效果");
-		System.out.printf("%-10s", "");
+		System.out.printf("%-7s", "");
 		for (String s : token2Number.keySet()) {
-			System.out.printf("%-10s", s);
+			System.out.printf("%-7s", s);
 		}
 		System.out.print("\n");
 		for (int i = 0; i < projectSet.size(); i++) {
-			System.out.printf("%-10d", i);
+			System.out.printf("%-7d", i);
 			for (int j = 0; j < token2Number.size(); j++) {
-				System.out.printf("%-10s", analyList[i][j]);
+				System.out.printf("%-7s", analyList[i][j]);
 			}
 			System.out.print("\n");
 		}
@@ -145,7 +160,7 @@ public class TOGrammer {
 		
 		//TODO 开始建立栈来识别
 		ArrayList<String> wordList = new ArrayList<>();
-		wordList = readWordList("src/word1.txt",wordList);
+		wordList = readWordList(oneWordName,wordList);
 		for(String s :wordList) {
 			System.out.print(s+" ");
 		}
@@ -195,7 +210,8 @@ public class TOGrammer {
 		// 先把头符号s'找出来
 		startToken = grammerList.get(0).split("->")[0];
 		for (Entry<String, Set<String>> entry : firstList.entrySet()) {
-			if (!gotoToken.contains(entry.getKey()) && !startToken.equals(entry.getKey())) {
+			//GOTO不能有开头？？？ && !startToken.equals(entry.getKey()
+			if (!gotoToken.contains(entry.getKey())) {
 				gotoToken.add(entry.getKey());
 			}
 			for (String s : entry.getValue()) {
@@ -208,6 +224,13 @@ public class TOGrammer {
 		}
 	}
 
+	//返回左移n位字符串方法
+	static String moveToLeft(String str,int position) {
+		String str1=str.substring(position);
+		String str2=str.substring(0, position);
+		return str1+str2;
+	}
+	
 	// 将I中的项向右移动一位
 	static void GOTO(ArrayList<String[]> set, int currentStateNumber) {
 		ArrayList<String> allStateSet = new ArrayList<>();
@@ -268,9 +291,16 @@ public class TOGrammer {
 						newGrammer = String.valueOf(stringContainDot.charAt(0)) + last + ".";
 					} else {
 						System.out.println("(1)A.BB类型");
-						String last = stringContainDot.substring(index + 1, stringContainDot.length());
-						newGrammer = stringContainDot.substring(0, index - 1) + stringContainDot.substring(index + 1) + "."
-								+ last.substring(1, last.length());
+						String docSplit1[] = stringContainDot.split("\\.");
+						String secondChar = String.valueOf(docSplit1[1].charAt(0));
+						System.out.println("nextCode："+secondChar);
+						System.out.println("后部分："+docSplit1[1]);
+						//String last = docSplit1[1].replaceFirst(secondChar, "");
+						//String last  = moveToLeft(docSplit1[1],1);
+						String last = docSplit1[1].substring(1);
+						System.out.println("移动后的串："+last);
+						newGrammer =docSplit1[0] + secondChar + "."
+								+ last;
 					}
 				}
 			}
@@ -300,6 +330,9 @@ public class TOGrammer {
 					gotoStateList[0] = String.valueOf(currentStateNumber);
 					gotoStateList[1] = docFollow ;
 					gotoStateList[2] = String.valueOf(nextStateNumber);
+					if(!actionToken.contains(docFollow) && !(gotoToken.contains(docFollow))) {//把他添加进action表项
+						actionToken.add(docFollow);
+					}
 					gotoList.add(gotoStateList);
 					if (flag == 1) {// 创建新的state
 						// System.out.println("创建newGrammer:"+newGrammer+","+grammerBack);
@@ -307,6 +340,7 @@ public class TOGrammer {
 						ArrayList<String[]> oneOfSet = new ArrayList<>();// 状态1
 						String a[] = { newGrammer, grammerBack };
 						startSet.add(a);// 构建出初始状态
+						System.out.println("求其闭包："+newGrammer);//求新的闭包
 						oneOfSet.addAll(closure(startSet));// 把闭包的所有状态都加入oneset集合
 						projectSet.add(oneOfSet);// 把状态加入状态大集合
 					}
@@ -322,6 +356,7 @@ public class TOGrammer {
 	static ArrayList<String[]> closure(ArrayList<String[]> set) {
 		int length = set.size();
 		ArrayList<String[]> newElement = new ArrayList<>();
+		System.out.println("进入求闭包");
 		for (int i = 0; i < length; i++) {
 			String grammer = set.get(i)[0];
 			String lastToken = set.get(i)[1];// "$"
@@ -334,27 +369,79 @@ public class TOGrammer {
 			if ((index != grammerList[1].length() - 1)) {// 不是这种：S->A.
 				// .后边不是空串
 				//TODO !!!!!!!修改 docFollow要判断是不是关键字 (TODO )
-				String docFollowString = grammerList[1].replace(".", "");
+				String docFollowString = grammerList[1].split("\\.")[1];
 				String ifSepecial [] = countSpecialToken(docFollowString);//后边的东西是否是关键字
 				if(ifSepecial[0].equals("")) {
 					docFollow = String.valueOf(grammerList[1].charAt(index + 1));// .后边的字符
 				}else {
 					docFollow  = ifSepecial[0];
 				}
-				if (!docFollow.equals("ε") && !actionToken.contains(docFollow)) {// 后边不是终结符
+				System.out.println(".........................后边的字"+docFollow);
+				if (!docFollow.equals("ε") && !actionToken.contains(docFollow)) {//后边不是终结符,不是空串
 					// System.out.println(docFollow);
 					// TODO 计算lastToken
 					if (index + 2 <= grammerList[1].length() - 1) {// 如果S后边还有字符，e.g.:s->A.BC
 						// System.out.println("需要遍历后继的："+grammerList[1]);
-						String docFollowFollow = String.valueOf(grammerList[1].charAt(index + 2));
-						lastToken = lastToken + getLRFirst(docFollowFollow,lastToken);
+						//判断followfollow是不是关键字，把docFollow替换掉，剩下的串判断顶头的是不是关键字
+						String docFollowFollowString = docFollowString.substring(docFollow.length());
+						String ifSepecial1 [] = countSpecialToken(docFollowFollowString);//后边的东西是否是关键字
+						//TODO !!!!!!前边添加终结符号，一定要添加完全，不然这里会少
+						//因为默认如何判断回来不是终结符，就会认为是B大写字母
+						if(ifSepecial1[0].equals("")) {//后边不是特殊终结符
+							//还有两种可能(1)是大写字母B 
+							System.out.println("第二个字符followfollow:"+docFollowFollowString);
+							String docFollowFollow = String.valueOf(docFollowFollowString.charAt(0));
+							if(gotoToken.contains(docFollowFollow)) {//是大写字母
+								lastToken = lastToken + getLRFirst(docFollowFollow,lastToken);
+							}else {
+								if(!lastToken.contains(ifSepecial1[0])) {
+									lastToken = lastToken + "|"+ifSepecial1[0];
+								}
+							}
+						}else {
+							//TODO 判断如果原来都没有，现在才加进去
+							if(!lastToken.contains(ifSepecial1[0])) {
+								lastToken = lastToken + "|"+ifSepecial1[0];
+							}
+						}
+
 					}
+					
 					// 找出所有的后继加进another列表
 					String str = docFollow + "->";// S->
+					System.out.println("求闭包，开头串："+str);
 					for (String s : grammerListFirst) {// 查找文法中包含S开头的式子
-						if (s.indexOf(str) != -1) {
-							String a[] = { s, lastToken };
-							newElement.add(a);
+						if ((s.indexOf(str) != -1)) {//前缀跟文法表达式相同
+							//并且s没有出现在set里边过
+							int ifSetSelf = 1;
+							//如果这个类型是E->.E+T类型
+							//--------------------新加上的-------------------
+							String selfType[] = s.split("->");
+							String selfDocFollow = String.valueOf(selfType[1].charAt(1));
+							if(selfType[0].equals(selfDocFollow)) {//E.equal(E)
+								//lastToken要多加上一些东西
+								String ifSepecial2 [] = countSpecialToken(selfType[1].substring(2));//+T
+								if((!ifSepecial2[0].equals("")) && (!lastToken.contains(ifSepecial2[0]))) {//是多个字符组成的终结符号
+										lastToken = lastToken + "|"+ifSepecial2[0];
+								}else {
+									String doubleFollow = String.valueOf(selfType[1].charAt(2));
+									if((!gotoToken.contains(doubleFollow)) &&(!lastToken.contains(doubleFollow))) {//是大写字母
+										lastToken = lastToken + "|"+ doubleFollow;
+									}
+								}
+							}
+							//--------------------新加上的-------------------
+							
+							for(String []oneG:set) {
+								if(oneG[0].contains(s)) {//新找到的表达式，set里边已经有了
+									//找到了E->E+T,lastToken多了一个+号
+									ifSetSelf = 0 ;
+								}
+							}
+							if(ifSetSelf==1) {
+								String a[] = { s, lastToken };
+								newElement.add(a);
+							}
 						}
 					}
 				}
@@ -384,7 +471,7 @@ public class TOGrammer {
 			}
 			//System.out.println("lookingAt(): "+matcher.lookingAt());
 		}
-		System.out.println(Arrays.toString(word));
+		//System.out.println(Arrays.toString(word));
 		return word;
 	}
 	
@@ -444,11 +531,13 @@ public class TOGrammer {
 						nextNode += rightNodes[i].charAt(j + 1);
 						++j;
 					}*/
-					if (stardardConbineGrammer.containsKey(nextNode)) {//S->BA 找B的first集合
+					if ((!curNode.equals(nextNode)) ) {//S->BA 找B的first集合
 						Set<String> tmpSt = findEveryFirst(nextNode, stardardConbineGrammer.get(nextNode));//遍历
 						st.addAll(tmpSt);
 						if (!tmpSt.contains("$"))
 							break;
+					}else {//E->E+F;
+						break;
 					}
 				}
 			}
@@ -483,25 +572,29 @@ public class TOGrammer {
 		System.out.println("构建DFA状态机");
 		int count = 0;
 		for (String s : actionToken) {
+			System.out.println("action添加"+s+" "+count);
 			token2Number.put(s, count);
 			count++;
 		}
 		
+		/*
+		for (String[] s : gotoList) {//不出从没添加的
+			//System.out.println(s[0] + " " + s[1] + " " + s[2]);
+			if(!token2Number.keySet().contains(s[1]) && !(gotoToken.contains(s[1])) && !(startToken.equals(s[1]))) {//还没包括的，添加进去
+				token2Number.put(s[1], count);
+				count++;
+			}
+		}
+		*/
 		if(!token2Number.keySet().contains("$")) {
+			System.out.println("$添加"+"$"+" "+count);
 			token2Number.put("$", count);
 			count++;
 		}
 		for (String s : gotoToken) {
+			System.out.println("goto添加"+s+" "+count);
 			token2Number.put(s, count);
 			count++;
-		}
-		
-		for (String[] s : gotoList) {//不出从没添加的
-			//System.out.println(s[0] + " " + s[1] + " " + s[2]);
-			if(!token2Number.keySet().contains(s[1])) {//还没包括的，添加进去
-				token2Number.put(s[1], count);
-				count++;
-			}
 		}
 		
 		
@@ -557,6 +650,7 @@ public class TOGrammer {
 	
 	static void judge(ArrayList<String> wordList){
 		stateStack.push(new String("0"));//状态栈的开始是0
+		tokenStack.push(new String("$"));
 		String action = "";//动作
 		String token = "";//当前字符
 		String currentState = "";//当前状态
@@ -567,24 +661,42 @@ public class TOGrammer {
 		int hang = Integer.valueOf(stackPeek);//行坐标
 		token = wordList.get(count);
 		int lie = token2Number.get(token);//列坐标
+		int iter = 1;
+		System.out.printf("%-9s","");
+		System.out.printf("%-65s","状态栈");
+		System.out.printf("%-60s","符号栈");
+		System.out.printf("%-10s","当前符号");
+		System.out.printf("\n");
 		while(!action.equals("acc")) {
+			
+			System.out.printf("%-5s",iter);
+			System.out.printf("%-40s",stateStack);
+			System.out.printf("%-40s",tokenStack);
+			System.out.printf("%-10s",token);
+			System.out.printf("\n");
+			
 			action = analyList[hang][lie];
-			System.out.println(action);
+			//System.out.println("当前操作"+action);
+			
+			if(action.equals("acc")) {
+				System.out.println("成功");
+				break;
+			}
 			if(action.contains("S")) {//S1
 				//压入状态站和符号
-				System.out.println("移入");
+				//System.out.println("移入");
 				tokenStack.push(new String(token));
 				currentState = action.replace("S","");
 				stateStack.push(new String(currentState));
-				count++;
-				token = wordList.get(count);
-				hang = Integer.valueOf(stackPeek);
-				lie = token2Number.get(token);
+				if(count<wordList.size()) {
+					count++;
+				}
 			}else {//R1
-				System.out.println("规约");
+				//System.out.println("规约");
 				String index = action.replace("R","");
-				String rString = grammerListLast.get(Integer.valueOf(index));//用哪个式子来规约
-				System.out.println("答案"+rString);
+				String rString = grammerList.get(Integer.valueOf(index));//用哪个式子来规约
+				//TODO !!!!!答案：要规约的式子
+				System.out.println("规约"+rString);
 				String right = rString.split("->")[1];//int +BT
 				String left = rString.split("->")[0];
 				
@@ -592,32 +704,51 @@ public class TOGrammer {
 				ArrayList<String> rWord = new ArrayList<>();
 				int specialIndex = 0;
 				String specilaRight =right;
+				
 				while(specialIndex<right.length()) {
-					String ifSepecial [] = countSpecialToken(specilaRight );
+					//System.out.println("总长度："+right.length()+" 现长度："+specialIndex);
+					String ifSepecial [] = countSpecialToken(specilaRight);
 					if(!ifSepecial[0].equals("")) {//是关键字
 						rWord.add(ifSepecial[0]);
 						specilaRight  = ifSepecial[1];//剩下的串
+						//System.out.println("找到的词"+ifSepecial[0]+" 剩下的串："+specilaRight);
 						specialIndex = specialIndex+ifSepecial[0].length();
 					}else {
 						rWord.add(String.valueOf(right.charAt(specialIndex)));
+						specilaRight = specilaRight.substring(1);
 						specialIndex++;
 					}
 				}
-				
+				for(String s : rWord) {
+					//System.out.print("规约单词"+s+" ");
+				}
+				//System.out.print("\n");
 				//把符号栈里边相同的弹出去
-				for(String s: rWord) {
-					if(tokenStack.peek().equals(s)) {//符号栈跟规约右边
+				for(int y =rWord.size()-1;y>=0;y-- ) {
+					if(tokenStack.peek().equals(rWord.get(y))) {//符号栈跟规约右边
 						tokenStack.pop();
 						stateStack.pop();
 					}
 				}
+				//System.out.println("规约弹出后的状态："+stateStack+" "+tokenStack);
 				//弹出完毕，把右边放进来
 				tokenStack.push(new String(left));
+				//System.out.println("规约弹放入后的状态："+stateStack+" "+tokenStack);
 				currentState = stateStack.peek();
 				currentToken = tokenStack.peek();
+				//System.out.println("当前状态："+currentState+"当前符号栈字符："+currentToken);
 				hang = Integer.valueOf(currentState);
-				lie = Integer.valueOf(currentToken);
+				lie = Integer.valueOf(token2Number.get(currentToken));
+				action = analyList[hang][lie];
+				stateStack.push(new String(action));
+				//System.out.println("规约完毕后的状态："+stateStack+" "+tokenStack);
 			}
+			token = wordList.get(count);
+			//System.out.println("当前字符："+token);
+			stackPeek = stateStack.peek();
+			hang = Integer.valueOf(stackPeek);
+			lie = token2Number.get(token);
+			iter++;
 		}
 	}
 	
