@@ -52,6 +52,7 @@ public class TOGrammer {
 		termimalToken.add("if");
 		termimalToken.add("&&");
 		termimalToken.add(";");
+		termimalToken.add("digit");
 		//打印出文法
 		for(int i = 0;i<grammerList.size();i++) {
 			System.out.println(i+" "+grammerList.get(i));
@@ -381,21 +382,32 @@ public class TOGrammer {
 					// System.out.println(docFollow);
 					// TODO 计算lastToken
 					if (index + 2 <= grammerList[1].length() - 1) {// 如果S后边还有字符，e.g.:s->A.BC
-						// System.out.println("需要遍历后继的："+grammerList[1]);
+						// System.out.println("需要遍历后继的："+grammerList[1]);//S->L=R
 						//判断followfollow是不是关键字，把docFollow替换掉，剩下的串判断顶头的是不是关键字
-						String docFollowFollowString = docFollowString.substring(docFollow.length());
+						String docFollowFollowString = docFollowString.substring(docFollow.length());//=R
 						String ifSepecial1 [] = countSpecialToken(docFollowFollowString);//后边的东西是否是关键字
 						//TODO !!!!!!前边添加终结符号，一定要添加完全，不然这里会少
 						//因为默认如何判断回来不是终结符，就会认为是B大写字母
 						if(ifSepecial1[0].equals("")) {//后边不是特殊终结符
 							//还有两种可能(1)是大写字母B 
 							System.out.println("第二个字符followfollow:"+docFollowFollowString);
-							String docFollowFollow = String.valueOf(docFollowFollowString.charAt(0));
+							String docFollowFollow = String.valueOf(docFollowFollowString.charAt(0));//+或者是B
 							if(gotoToken.contains(docFollowFollow)) {//是大写字母
-								lastToken = lastToken + getLRFirst(docFollowFollow,lastToken);
+								//TODO 原来写错如s->A.BC，C包含空串，才是相加，不包含空串，则直接覆盖
+								if(firstList.get(docFollowFollow).contains("ε")) {
+									lastToken = lastToken + getLRFirst(docFollowFollow,lastToken);
+								}else {
+									//如果不包含ε
+									for(String k : firstList.get(docFollowFollow)) {
+										lastToken = lastToken+"|"+k;
+									}
+								}
+								
 							}else {
-								if(!lastToken.contains(ifSepecial1[0])) {
-									lastToken = lastToken + "|"+ifSepecial1[0];
+								if(!lastToken.contains(docFollowFollow)) {//+ 单个字节的终结符号
+									//TODO 原来写错了
+									//lastToken = lastToken + "|"+docFollowFollow;
+									lastToken = docFollowFollow;
 								}
 							}
 						}else {
@@ -415,6 +427,7 @@ public class TOGrammer {
 							//并且s没有出现在set里边过
 							int ifSetSelf = 1;
 							//如果这个类型是E->.E+T类型
+							
 							//--------------------新加上的-------------------
 							String selfType[] = s.split("->");
 							String selfDocFollow = String.valueOf(selfType[1].charAt(1));
@@ -433,8 +446,11 @@ public class TOGrammer {
 							//--------------------新加上的-------------------
 							
 							for(String []oneG:set) {
-								if(oneG[0].contains(s)) {//新找到的表达式，set里边已经有了
+								if((oneG[0].contains(s))) {//新找到的表达式，set里边已经有了
 									//找到了E->E+T,lastToken多了一个+号
+									if(!oneG[1].contains(lastToken)) {
+										oneG[1] = oneG[1]+"|"+lastToken;
+									}
 									ifSetSelf = 0 ;
 								}
 							}
@@ -747,6 +763,7 @@ public class TOGrammer {
 			//System.out.println("当前字符："+token);
 			stackPeek = stateStack.peek();
 			hang = Integer.valueOf(stackPeek);
+			//System.out.println("下一个符号："+token);
 			lie = token2Number.get(token);
 			iter++;
 		}

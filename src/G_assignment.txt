@@ -1,6 +1,6 @@
-S->id=E
-E->E+T;
-E->T
-T->F
-F->id
-F->num
+S'->S
+S->L=R
+S->R
+L->*R
+L->id
+R->L

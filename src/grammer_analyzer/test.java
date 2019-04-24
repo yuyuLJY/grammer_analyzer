@@ -87,6 +87,17 @@ public class test {
 		System.out.println(b.contains(a));
 	}
 	
+	//重写GOTO函数
+	//输入：（1）一个set，一个状态集合；（2）当前的state的序号
+	//目标：记录下跳转的状态，和调用求闭包的函数，得出其他的状态集合
+	static void GOTO(ArrayList<String[]> set, int currentStateNumber) {
+		//TODO 重新修改TODO函数
+		//TODO 先使用一个map<String ,set>来刻画要有几个新的state
+		//TODO 对每个语句进行处理
+	}
+	
+	
+	
 	static String moveToLeft(String str,int position) {
 		String str1=str.substring(position);
 		System.out.println("str1:"+str1);
