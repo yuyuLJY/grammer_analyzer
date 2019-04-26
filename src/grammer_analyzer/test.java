@@ -3,6 +3,9 @@ package grammer_analyzer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.ListIterator;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -78,24 +81,21 @@ public class test {
 		String docSplit[] = s.split("\\.");
 		System.out.println("A.B分开"+Arrays.toString(docSplit));
 		*/
-		/*
+		
 		String str="say87";
+		String s1=".A";
+		String s2="A.B";
+		String s3=".AB";
+		String s4="A.BC";
+		int index1 = s1.indexOf(".");//0
+		String newS1 = s1.substring(0,index1+2);//index = 0 (0,1)="." (0,2) = ".A"
+		
+		int index2 = s2.indexOf(".");
+		String newS = s2.substring(0,index2);//index = 1 (0,1)=A (0,2) = "A."
+		
+		System.out.println(newS1);
 		System.out.println(moveToLeft(str, 2));//左移两位
-		*/
-		String a = "a|b";
-		String b = "a|b|c";
-		System.out.println(b.contains(a));
 	}
-	
-	//重写GOTO函数
-	//输入：（1）一个set，一个状态集合；（2）当前的state的序号
-	//目标：记录下跳转的状态，和调用求闭包的函数，得出其他的状态集合
-	static void GOTO(ArrayList<String[]> set, int currentStateNumber) {
-		//TODO 重新修改TODO函数
-		//TODO 先使用一个map<String ,set>来刻画要有几个新的state
-		//TODO 对每个语句进行处理
-	}
-	
 	
 	
 	static String moveToLeft(String str,int position) {
