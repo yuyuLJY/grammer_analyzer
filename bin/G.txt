@@ -1,6 +1,5 @@
-S'->S
-S->A
-A->BA
-A->¦Å
-B->aB
-B->b
+S->id=E;
+E->E+E
+E->E*E
+E->(E)
+E->id

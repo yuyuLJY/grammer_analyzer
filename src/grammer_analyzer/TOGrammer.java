@@ -34,25 +34,31 @@ public class TOGrammer {
 	static Stack<String> stateStack = new Stack<String>();
 	static Stack<String> tokenStack = new Stack<String>();
 	static String[][] analyList = new String[projectSet.size()][token2Number.size()];
+	static ArrayList<String> errorInfoListMore = new ArrayList<>();// 记录错误信息
+	static ArrayList<String> errorInfoListLess = new ArrayList<>();// 记录错误信息
 	public static void main(String[] args) {
 		System.out.println("----------------Start------------");
-		String GName[] = {"G_if_else.txt","G_assignment.txt","G_declear.txt","G_declare_assignment.txt"};
-		String wordName[] = {"word_if_else.txt","word_assignment.txt","word_declare.txt","word_declare_assignment.txt"};
-		String oneWordName = "src/"+wordName[1];
+		String GName[] = {"G_if_else.txt","G_assignment.txt","G_declear.txt","G_declare_assignment.txt","G_while.txt","G.txt"};
+		String wordName[] = {"word_if_else.txt","word_assignment.txt","word_declare.txt","word_declare_assignment.txt","word_while.txt","word.txt"};
+		String oneWordName = "src/"+wordName[3];
 		
 		// TODO 读取文法
-		readGrammer("src/"+GName[1]);// 输入的必须是增广文法
+		readGrammer("src/"+GName[3]);// 输入的必须是增广文法
 		
 		//TODO 构建block
 		termimalToken.add("num");
 		termimalToken.add("int");
 		termimalToken.add("id");
 		termimalToken.add("E'");
+		termimalToken.add("E''");
 		termimalToken.add("else");
 		termimalToken.add("if");
 		termimalToken.add("&&");
 		termimalToken.add(";");
 		termimalToken.add("digit");
+		termimalToken.add("do");
+		termimalToken.add("then");
+		termimalToken.add("while");
 		//打印出文法
 		for(int i = 0;i<grammerList.size();i++) {
 			System.out.println(i+" "+grammerList.get(i));
@@ -798,6 +804,7 @@ public class TOGrammer {
 	}
 	
 	static void judge(ArrayList<String> wordList){
+		ArrayList<String> errorTokenLess = new ArrayList<>();//缺少的符号
 		stateStack.push(new String("0"));//状态栈的开始是0
 		tokenStack.push(new String("$"));
 		String action = "";//动作
@@ -816,19 +823,21 @@ public class TOGrammer {
 		System.out.printf("%-60s","符号栈");
 		System.out.printf("%-10s","当前符号");
 		System.out.printf("\n");
+		boolean ifSuccess = false;
+		boolean firstError = false;
 		while(!action.equals("acc")) {
-			/*
+		
 			System.out.printf("%-5s",iter);
 			System.out.printf("%-40s",stateStack);
 			System.out.printf("%-40s",tokenStack);
 			System.out.printf("%-10s",token);
 			System.out.printf("\n");
-			*/
+			
 			action = analyList[hang][lie];
 			//System.out.println("当前操作"+action);
 			
 			if(action.equals("acc")) {
-				System.out.println("成功");
+				 ifSuccess = true;
 				break;
 			}
 			if(action.contains("S")) {//S1
@@ -840,7 +849,7 @@ public class TOGrammer {
 				if(count<wordList.size()) {
 					count++;
 				}
-			}else {//R1
+			}else if(action.contains("R")) {//R1
 				//System.out.println("规约");
 				String index = action.replace("R","");
 				String rString = grammerList.get(Integer.valueOf(index));//用哪个式子来规约
@@ -891,6 +900,24 @@ public class TOGrammer {
 				action = analyList[hang][lie];
 				stateStack.push(new String(action));
 				//System.out.println("规约完毕后的状态："+stateStack+" "+tokenStack);
+			}else {
+				//TODO 求出多余的字符
+				String ingfo = "["+count+"]"+"[多余字符"+token+"]";
+				//System.out.println(ingfo);
+				errorInfoListMore.add(ingfo);
+				if(firstError==false){
+					//TODO 也求出缺少什么
+					errorTokenLess = judgeErrorLess(hang);
+					String[] array = (String[])errorTokenLess.toArray(new String[errorTokenLess.size()]);
+					String lessInfo = "["+count+"]"+"[缺少字符"+Arrays.toString(array)+"]";
+					errorInfoListLess.add(lessInfo);
+					//System.out.println("大小："+errorTokenLess.size());
+				}
+				count++;//直接略过这个字符
+				firstError=true;
+				if(count>=wordList.size()) {
+					break;//大于当前的字符串的段
+				}
 			}
 			token = wordList.get(count);
 			//System.out.println("当前字符："+token);
@@ -900,8 +927,37 @@ public class TOGrammer {
 			lie = token2Number.get(token);
 			iter++;
 		}
+		//判断是否成功
+		System.out.println("----------------信息提示----------");
+		if( ifSuccess == true) {//移位是正确的
+			System.out.println("成功");
+			for(String s :errorInfoListMore) {
+				System.out.println(s);
+			}
+		}else {
+			System.out.println("失败");
+			for(String s :errorInfoListLess) {
+				System.out.println(s);
+			}
+		}
 	}
 	
-	
+	static ArrayList<String> judgeErrorLess(int hang) {
+		//System.out.println("行号："+hang);
+		ArrayList<String> errorTokenLess = new ArrayList<>();//缺少的符号
+		for(int i = 0;i<analyList[hang].length;i++) {
+			if((analyList[hang][i]!="")) {
+				//找出这个对应的坐标符号
+				System.out.println(analyList[hang][i]);
+				for(String s : token2Number.keySet()) {
+					if((token2Number.get(s)==i)&&(actionToken.contains(s))) {//就是这个字符
+						//System.out.println("字符："+s);
+						errorTokenLess.add(s);
+					}
+				}
+			}
+		}
+		return errorTokenLess;
+	}
 	
 }
